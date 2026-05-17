@@ -729,18 +729,30 @@ function renderFileCard(f) {
   card.className = 'fdrop-file'; card.id = f.id;
   const isPdf = f.name.endsWith('.pdf');
   card.innerHTML = `
-    <div class="fdrop-file-hdr">
+    <div class="fdrop-file-hdr" onclick="toggleFileView('viewer-${f.id}')" style="cursor:pointer">
       <span class="fdrop-file-name">📄 ${f.name}</span>
       <span style="display:flex;align-items:center;gap:.75rem">
         <span class="fdrop-file-size">${f.kb} KB</span>
-        <button class="fdrop-file-del" onclick="removeFile('${f.id}')" title="Eliminar">✕</button>
+        <span style="font-size:11px;color:var(--t3);font-family:var(--mono)" id="toggle-lbl-${f.id}">▶ abrir</span>
+        <button class="fdrop-file-del" onclick="event.stopPropagation();removeFile('${f.id}')" title="Eliminar">✕</button>
       </span>
     </div>
-    ${isPdf
-      ? `<iframe src="${f.dataUrl}" style="width:100%;height:600px;border:none;border-radius:8px;margin-top:.5rem;background:#fff"></iframe>`
-      : `<div class="fdrop-file-content">${f.dataUrl.slice(0,3000)}</div>`
-    }`;
+    <div id="viewer-${f.id}" style="display:none;margin-top:.75rem">
+      ${isPdf
+        ? `<iframe src="${f.dataUrl}" style="width:100%;height:600px;border:none;border-radius:8px;background:#fff"></iframe>`
+        : `<div class="fdrop-file-content">${f.dataUrl.slice(0,3000)}</div>`
+      }
+    </div>`;
   container.appendChild(card);
+}
+
+function toggleFileView(viewerId) {
+  const viewer = document.getElementById(viewerId);
+  const lbl    = document.getElementById('toggle-lbl-' + viewerId.replace('viewer-',''));
+  if (!viewer) return;
+  const open = viewer.style.display === 'none';
+  viewer.style.display = open ? 'block' : 'none';
+  lbl.textContent = open ? '▼ cerrar' : '▶ abrir';
 }
 
 function removeFile(id) {
